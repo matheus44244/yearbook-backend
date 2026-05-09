@@ -14,7 +14,7 @@ app.get('/status', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-// inicia o servidor localmente — na Vercel essa parte é pulada
+// inicia o servidor- localmente — na Vercel essa parte é pulada
 if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
