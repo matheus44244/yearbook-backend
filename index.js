@@ -1,20 +1,25 @@
-import express from 'express'; // importa o Express usando ES Modules
-import prisma from './prisma/client.js';
-const app = express(); // cria a aplicação Express
-const PORT = 3000; // porta onde o servidor vai rodar localmente
+import express from 'express';                // importa o Express
+import alunosRouter from './routes/alunos.js'; // importa o router de alunos <- NOVO
 
-// rota GET na raiz — responde com JSON
+const app = express();      // cria a aplicação Express
+const PORT = 3000;          // porta do servidor
+
+app.use(express.json());    // middleware que parseia JSON do body das requisições  <- NOVO
+
+// rota raiz — boas-vindas
 app.get('/', (req, res) => {
   res.json({ mensagem: 'Yearbook API está no ar! 🎓' });
 });
 
+// rota de health check
 app.get('/status', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString()
-  });
+  res.json({ status: 'ok', timestamp: new Date() });
 });
-// inicia o servidor- localmente — na Vercel essa parte é pulada
+
+// registra as rotas de alunos com prefixo /alunos  <- NOVO
+app.use('/alunos', alunosRouter);
+
+// inicia o servidor localmente — na Vercel essa parte é pulada
 if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
@@ -23,29 +28,3 @@ if (process.env.VERCEL !== '1') {
 
 // exporta o app para a Vercel usar como serverless function
 export default app;
-
-const alunos = await prisma.aluno.findMany({
-  select: {
-    id: true,
-    nome: true,
-    email: true,
-    cidade: true,
-    frase: true,
-    planosFuturos: true,
-    fotoUrl: true,
-    role: true,
-    criadoEm: true,
-    // senhaHash: NÃO está aqui — nunca retornado
-  },
-});
-
-const mensagens = await prisma.mensagem.findMany({
-  include: {
-    autor: {
-      select: {
-        nome: true,
-        fotoUrl: true,
-      },
-    },
-  },
-});
